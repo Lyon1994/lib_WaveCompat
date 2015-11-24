@@ -1985,13 +1985,12 @@ containing a value of this type.
         public static int abc_tab_indicator_material=0x7f02003d;
         public static int abc_tab_indicator_mtrl_alpha=0x7f02003e;
         public static int abc_text_cursor_material=0x7f02003f;
-        public static int abc_text_cursor_mtrl_alpha=0x7f020040;
-        public static int abc_textfield_activated_mtrl_alpha=0x7f020041;
-        public static int abc_textfield_default_mtrl_alpha=0x7f020042;
-        public static int abc_textfield_search_activated_mtrl_alpha=0x7f020043;
-        public static int abc_textfield_search_default_mtrl_alpha=0x7f020044;
-        public static int abc_textfield_search_material=0x7f020045;
-        public static int notification_template_icon_bg=0x7f020046;
+        public static int abc_textfield_activated_mtrl_alpha=0x7f020040;
+        public static int abc_textfield_default_mtrl_alpha=0x7f020041;
+        public static int abc_textfield_search_activated_mtrl_alpha=0x7f020042;
+        public static int abc_textfield_search_default_mtrl_alpha=0x7f020043;
+        public static int abc_textfield_search_material=0x7f020044;
+        public static int notification_template_icon_bg=0x7f020045;
     }
     public static final class id {
         public static int action0=0x7f090050;
@@ -2150,19 +2149,18 @@ containing a value of this type.
         public static int abc_search_dropdown_item_icons_2line=0x7f030016;
         public static int abc_search_view=0x7f030017;
         public static int abc_select_dialog_material=0x7f030018;
-        public static int abc_simple_dropdown_hint=0x7f030019;
-        public static int notification_media_action=0x7f03001a;
-        public static int notification_media_cancel_action=0x7f03001b;
-        public static int notification_template_big_media=0x7f03001c;
-        public static int notification_template_big_media_narrow=0x7f03001d;
-        public static int notification_template_lines=0x7f03001e;
-        public static int notification_template_media=0x7f03001f;
-        public static int notification_template_part_chronometer=0x7f030020;
-        public static int notification_template_part_time=0x7f030021;
-        public static int select_dialog_item_material=0x7f030022;
-        public static int select_dialog_multichoice_material=0x7f030023;
-        public static int select_dialog_singlechoice_material=0x7f030024;
-        public static int support_simple_spinner_dropdown_item=0x7f030025;
+        public static int notification_media_action=0x7f030019;
+        public static int notification_media_cancel_action=0x7f03001a;
+        public static int notification_template_big_media=0x7f03001b;
+        public static int notification_template_big_media_narrow=0x7f03001c;
+        public static int notification_template_lines=0x7f03001d;
+        public static int notification_template_media=0x7f03001e;
+        public static int notification_template_part_chronometer=0x7f03001f;
+        public static int notification_template_part_time=0x7f030020;
+        public static int select_dialog_item_material=0x7f030021;
+        public static int select_dialog_multichoice_material=0x7f030022;
+        public static int select_dialog_singlechoice_material=0x7f030023;
+        public static int support_simple_spinner_dropdown_item=0x7f030024;
     }
     public static final class string {
         /**  Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] 
@@ -2266,10 +2264,6 @@ containing a value of this type.
  API 14 theme customizations can go here. 
          */
         public static int AppBaseTheme=0x7f0b0133;
-        /**  Application theme. 
- All customizations that are NOT specific to a particular API-level can go here. 
-         */
-        public static int AppTheme=0x7f0b0134;
         public static int Base_AlertDialog_AppCompat=0x7f0b00cc;
         public static int Base_AlertDialog_AppCompat_Light=0x7f0b00cd;
         public static int Base_Animation_AppCompat_Dialog=0x7f0b00c8;
