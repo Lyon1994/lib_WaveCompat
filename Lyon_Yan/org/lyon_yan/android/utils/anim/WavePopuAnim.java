@@ -1,44 +1,60 @@
 package org.lyon_yan.android.utils.anim;
 
+import org.lyon_yan.android.utils.anim.CircleWaveAnim.OnItemAnimDownFinishListener;
+
+import android.annotation.TargetApi;
+import android.content.Context;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.PopupWindow;
 import android.widget.Toast;
-import android.widget.LinearLayout.LayoutParams;
 
+@TargetApi(Build.VERSION_CODES.FROYO)
 public class WavePopuAnim implements OnTouchListener {
-	private View contentView = null;
+	private CircleWaveAnim circleWaveAnim = null;
 	private View parent = null;
-
-	private void setContentView(View contentView) {
-		this.contentView = contentView;
-	}
+	private int x = 0;
+	private int y = 0;
 
 	private void setParent(View parent) {
 		this.parent = parent;
 	}
 
-	private void setBackground(Drawable background) {
-		this.background = background;
+	public WavePopuAnim(View parent, Drawable background, Context context) {
+		this(parent, background, context, 0, 0);
 	}
 
-	private Drawable background = null;
-
-	public WavePopuAnim(View parent, View contentView, Drawable background) {
-		setBackground(background);
-		setContentView(contentView);
+	/**
+	 * 
+	 * @author Lyon_Yan <br/>
+	 *         <b>time</b>: 2015年11月26日 下午1:09:55
+	 * @param parent
+	 * @param background
+	 * @param context
+	 * @param x
+	 *            偏移量
+	 * @param y
+	 *            偏移量
+	 */
+	public WavePopuAnim(View parent, Drawable background, Context context,
+			int x, int y) {
 		setParent(parent);
-	}
-
-	private void showPopupWindow(Point focus_point) {
-		final PopupWindow popupWindow = new PopupWindow(contentView,
-				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, true);
-
+		this.x = x;
+		this.y = y;
+		circleWaveAnim = new CircleWaveAnim(context);
+		LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT,
+				LayoutParams.MATCH_PARENT);
+		circleWaveAnim.setLayoutParams(layoutParams);
+		popupWindow = new PopupWindow(circleWaveAnim,
+				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, true);
 		popupWindow.setTouchable(true);
 		popupWindow.setTouchInterceptor(new OnTouchListener() {
 
@@ -52,17 +68,48 @@ public class WavePopuAnim implements OnTouchListener {
 				// 拦截后 PopupWindow的onTouchEvent不被调用，这样点击外部区域无法dismiss
 			}
 		});
-
 		// 如果不设置PopupWindow的背景，无论是点击外部区域还是Back键都无法dismiss弹框
 		// 我觉得这里是API的一个bug
 		popupWindow.setBackgroundDrawable(background);
+		circleWaveAnim
+				.setOnItemAnimDownFinishListener(new OnItemAnimDownFinishListener() {
+
+					@Override
+					public void onCancel(int index) {
+						// TODO Auto-generated method stub
+						popupWindow.dismiss();
+					}
+				});
+		circleWaveAnim.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				popupWindow.dismiss();
+			}
+		});
+	}
+
+	private PopupWindow popupWindow = null;
+
+	/**
+	 * 
+	 * @author Lyon_Yan <br/>
+	 *         <b>time</b>: 2015年11月26日 下午1:06:26
+	 * @param startPoint
+	 * @param focus_point
+	 */
+	public void showPopupWindow(Point startPoint, Point focus_point) {
 		Toast.makeText(parent.getContext(),
 				"focus_point:(" + focus_point.x + "," + focus_point.y + ")",
 				Toast.LENGTH_SHORT).show();
 		// 设置好参数之后再show
-		popupWindow.showAtLocation(parent, Gravity.NO_GRAVITY, focus_point.x,
-				focus_point.y);
+		popupWindow.showAtLocation(parent, Gravity.NO_GRAVITY, x, y);
+		circleWaveAnim.focusPoints(startPoint, focus_point);
+	}
 
+	public void showPopupWindow(Point focus_point) {
+		showPopupWindow(focus_point, focus_point);
 	}
 
 	@Override

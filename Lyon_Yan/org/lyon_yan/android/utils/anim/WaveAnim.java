@@ -6,36 +6,234 @@ import java.util.List;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
+import android.graphics.Point;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.MeasureSpec;
+import android.view.animation.Interpolator;
 
 public class WaveAnim {
 	private View view = null;
-
+	private int width;
+	private int height;
+	private boolean isUP = true;
+	private int color_main = Color.RED;
 
 	private View getView() {
 		return view;
 	}
 
-	public static WaveAnim bindWaveAnim(View view) {
-		return new WaveAnim(view);
+	public static WaveAnim bindWaveUpAnim(View view) {
+		return new WaveAnim(view, true);
 	}
 
-	private WaveAnim(View view) {
+	public static WaveAnim bindWaveDownAnim(View view) {
+		return new WaveAnim(view, false);
+	}
+
+	private WaveAnim(View view, boolean isUP) {
 		this.view = view;
 		waveList = Collections.synchronizedList(new ArrayList<Wave>());
+		setUP(isUP);
+		if (isUP) {
+			setAlphaInterpolator(new AlphaUpInterpolator());
+			setRadiusInterpolator(new RadiusUpInterpolator());
+		} else {
+			setAlphaInterpolator(new AlphaDownInterpolator());
+			setRadiusInterpolator(new RadiusDownInterpolator());
+		}
 	}
 
+	/**
+	 * 自定义差值器
+	 * 
+	 * @author Lyon_Yan <br/>
+	 *         <b>time</b>: 2015年11月25日 下午2:00:57
+	 */
+	public interface WaveAnimInterpolator extends Interpolator {
+
+		public void clear();
+		
+		public boolean isCancel(Wave wave);
+
+	}
+
+	public static class RadiusUpInterpolator implements WaveAnimInterpolator {
+
+		/**
+		 * 初始动画扩散速度
+		 */
+		private int speed = 50;
+		/**
+		 * 每次需要变化速度的差值
+		 */
+		private final int speed_d = 2;
+
+		@Override
+		public float getInterpolation(float input) {
+			// TODO Auto-generated method stub
+			speed += speed_d;
+			return input + speed;
+		}
+
+		@Override
+		public void clear() {
+			// TODO Auto-generated method stub
+			speed = 50;
+		}
+
+		@Override
+		public boolean isCancel(Wave wave) {
+			// TODO Auto-generated method stub
+			return wave.getRadius() > wave.getMax_radius();
+		}
+	}
+
+	public static class RadiusDownInterpolator implements WaveAnimInterpolator {
+
+		/**
+		 * 初始动画扩散速度
+		 */
+		private int speed = -100;
+		/**
+		 * 每次需要变化速度的差值
+		 */
+		private final int speed_d = 1;
+
+		@Override
+		public float getInterpolation(float input) {
+			// TODO Auto-generated method stub
+			if (speed + speed_d < 0) {
+				speed += speed_d;
+			}
+			return input + speed;
+		}
+
+		@Override
+		public void clear() {
+			// TODO Auto-generated method stub
+			speed = -100;
+		}
+		
+		@Override
+		public boolean isCancel(Wave wave) {
+			// TODO Auto-generated method stub
+			return wave.getRadius() <0;
+		}
+	}
+
+	public static class AlphaUpInterpolator implements WaveAnimInterpolator {
+
+		/**
+		 * 初始动画扩散速度
+		 */
+		@SuppressWarnings("unused")
+		private int speed = 0;
+		/**
+		 * 每次需要变化速度的差值
+		 */
+		@SuppressWarnings("unused")
+		private final int speed_d = 5;
+
+		@Override
+		public float getInterpolation(float input) {
+			// TODO Auto-generated method stub
+			// speed += speed_d;
+			// return input - speed_d;
+			return input;
+		}
+
+		@Override
+		public void clear() {
+			// TODO Auto-generated method stub
+			speed = 0;
+		}
+
+		@Override
+		public boolean isCancel(Wave wave) {
+			// TODO Auto-generated method stub
+			return wave.getAlpha()==0;
+		}
+
+	}
+
+	public static class AlphaDownInterpolator implements WaveAnimInterpolator {
+
+		/**
+		 * 初始动画扩散速度
+		 */
+		@SuppressWarnings("unused")
+		private int speed = 0;
+		/**
+		 * 每次需要变化速度的差值
+		 */
+		@SuppressWarnings("unused")
+		private final int speed_d = -5;
+
+		@Override
+		public float getInterpolation(float input) {
+			// TODO Auto-generated method stub
+//			 speed += speed_d;
+//			 return input - speed_d;
+			return input;
+		}
+
+		@Override
+		public void clear() {
+			// TODO Auto-generated method stub
+			speed = 0;
+		}
+
+		@Override
+		public boolean isCancel(Wave wave) {
+			// TODO Auto-generated method stub
+			return wave.getAlpha()==255;
+		}
+
+	}
+
+	private OnItemAnimFinishListener onItemAnimFinishListener = new OnItemAnimFinishListener() {
+
+		@Override
+		public void onCancel(int index) {
+			// TODO Auto-generated method stub
+
+		}
+	};
+
+	public interface OnItemAnimFinishListener {
+		public void onCancel(int index);
+	}
+
+	private WaveAnimInterpolator alphaInterpolator = new AlphaUpInterpolator();
+
+	public void setAlphaInterpolator(WaveAnimInterpolator alphaInterpolator) {
+		this.alphaInterpolator = alphaInterpolator;
+	}
+
+	public WaveAnimInterpolator getAlphaInterpolator() {
+		return alphaInterpolator;
+	}
+
+	public void setRadiusInterpolator(WaveAnimInterpolator radiusInterpolator) {
+		this.radiusInterpolator = radiusInterpolator;
+	}
+
+	public WaveAnimInterpolator getRadiusInterpolator() {
+		return radiusInterpolator;
+	}
+
+	/**
+	 * 用於擴散的差值器
+	 */
+	private WaveAnimInterpolator radiusInterpolator = new RadiusUpInterpolator();
 	/**
 	 * 最大的不透明度，完全不透明
 	 */
 	private static final int MAX_ALPHA = 255;
-
-	protected static final int FLUSH_ALL = -1;
-
 	private boolean isStart = true;
 	private Handler handler = new Handler() {
 
@@ -60,14 +258,6 @@ public class WaveAnim {
 		}
 
 	};
-	/**
-	 * 初始动画扩散速度
-	 */
-	private int speed = 0;
-	/**
-	 * 每次需要变化速度的差值
-	 */
-	private int speed_d = 5;
 
 	/**
 	 * 刷新状态
@@ -78,49 +268,51 @@ public class WaveAnim {
 		 */
 		for (int i = 0; i < waveList.size(); i++) {
 			Wave wave = waveList.get(i);
-			if (isStart == false && wave.alpha == 0) {
+			Log.v("lyon8", "lyon8:----->\nwave.getRadius():" + wave.getRadius()
+					+ "\nwave.getMax_radius():" + wave.getMax_radius());
+			if (isStart == false
+					&& radiusInterpolator.isCancel(wave)) {
 				waveList.remove(i);
-				wave.paint = null;
+				wave.GC();
 				wave = null;
-				speed = 0;
+				alphaInterpolator.clear();
+				radiusInterpolator.clear();
+				getOnItemAnimFinishListener().onCancel(i);
 				continue;
 			} else if (isStart == true) {
 				isStart = false;
 			}
-			speed += speed_d;
-			wave.radius += speed;
-			wave.alpha -= 5;
-			if (wave.alpha < 0) {
-				wave.alpha = 0;
-			}
-			wave.width = wave.radius / 4;
-			wave.paint.setAlpha(wave.alpha);
-			wave.paint.setStrokeWidth(wave.width);
+			wave.setRadius(radiusInterpolator.getInterpolation(wave.getRadius()));
+			wave.setAlpha(alphaInterpolator.getInterpolation(wave.getAlpha()));
 		}
 
 	}
 
-	/**
-	 * 初始化paint
-	 */
-	private Paint initPaint(int alpha, float width) {
-		/*
-		 * 新建一个画笔
-		 */
-		Paint paint = new Paint();
+	public void focusPoint(int x, int y) {
+		Wave wave = new Wave(width, height);
+		wave.setCircleCenter(x, y);
+		if (isUP()) {
+			wave.setRadius(0);
+			wave.setAlpha(MAX_ALPHA);
+		} else {
+			wave.setRadius(wave.getMax_radius());
+			wave.setAlpha(MAX_ALPHA);
+		}
+		wave.getPaint().setColor(Color.RED);
+		if (waveList.size() == 0) {
+			isStart = true;
+		}
+		System.out.println("isStart=" + isStart);
+		waveList.add(wave);
+		// 点击之后刷洗一次图形
+		getView().invalidate();
+		if (isStart) {
+			handler.sendEmptyMessage(0);
+		}
+	}
 
-		paint.setAntiAlias(true);
-		paint.setStrokeWidth(width);
-
-		// 设置是环形方式绘制
-		paint.setStyle(Paint.Style.FILL);
-
-		// System.out.println(alpha= + alpha);
-		paint.setAlpha(alpha);
-		// System.out.println(得到的透明度： + paint.getAlpha());
-
-		paint.setColor(Color.RED);
-		return paint;
+	public void focusPoint(Point point) {
+		focusPoint(point.x, point.y);
 	}
 
 	/**
@@ -129,35 +321,12 @@ public class WaveAnim {
 	public boolean bindWaveTouchEvent(MotionEvent event) {
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
-			Wave wave = new Wave();
-			wave.radius = 0;
-			wave.alpha = MAX_ALPHA;
-			wave.width = wave.radius / 4;
-			wave.xDown = (int) event.getX();
-			wave.yDown = (int) event.getY();
-			wave.paint = initPaint(wave.alpha, wave.width);
-			if (waveList.size() == 0) {
-				isStart = true;
-			}
-			System.out.println("isStart=" + isStart);
-			waveList.add(wave);
-			// 点击之后刷洗一次图形
-			getView().invalidate();
-			if (isStart) {
-				handler.sendEmptyMessage(0);
-			}
-			break;
-		case MotionEvent.ACTION_MOVE:
-
-			break;
-		case MotionEvent.ACTION_UP:
-
+			focusPoint(Math.round(event.getX()), Math.round(event.getY()));
 			break;
 
 		default:
 			break;
 		}
-
 		return true;
 	}
 
@@ -168,8 +337,41 @@ public class WaveAnim {
 		// 重绘所有圆环
 		for (int i = 0; i < waveList.size(); i++) {
 			Wave wave = waveList.get(i);
-			canvas.drawCircle(wave.xDown, wave.yDown, wave.radius, wave.paint);
+			canvas.drawCircle(wave.getX(), wave.getY(), wave.getRadius(),
+					wave.getPaint());
 		}
+	}
+
+	public void BindWaveMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		this.width = MeasureSpec.getSize(widthMeasureSpec);
+		;
+		this.height = MeasureSpec.getSize(heightMeasureSpec);
+		;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
+	public boolean isUP() {
+		return isUP;
+	}
+
+	private void setUP(boolean isUP) {
+		this.isUP = isUP;
+	}
+
+	public OnItemAnimFinishListener getOnItemAnimFinishListener() {
+		return onItemAnimFinishListener;
+	}
+
+	public void setOnItemAnimFinishListener(
+			OnItemAnimFinishListener onItemAnimFinishListener) {
+		this.onItemAnimFinishListener = onItemAnimFinishListener;
 	}
 
 	/**
@@ -177,21 +379,7 @@ public class WaveAnim {
 	 */
 	private List<Wave> waveList;
 
-	private class Wave {
-		/**
-		 * 用来表示圆环的半径
-		 */
-		float radius;
-		Paint paint;
-		/**
-		 * 按下的时候x坐标
-		 */
-		int xDown;
-		/**
-		 * 按下的时候y的坐标
-		 */
-		int yDown;
-		float width;
-		int alpha;
+	public List<Wave> getWaveList() {
+		return new ArrayList<>(waveList);
 	}
 }
